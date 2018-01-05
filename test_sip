@@ -1,9 +1,8 @@
 #!/bin/bash
 
-SIP_FILE=$(realpath "$1");
-SIP_ADDRESS="$2";
+VARS_FILE="/home/larry/ansible/inst_vars/$1";
 
-CMD="docker run --mount type=bind,source=$SIP_FILE,target=/SIPconfig.xml  koha-sip2-cli-docker test_sip.pl /SIPconfig.xml $SIP_ADDRESS"
+CMD="docker run --mount type=bind,source=$VARS_FILE,target=/vars.yml  koha-sip2-cli-docker test_sip.pl /vars.yml"
 #echo $CMD;
 ${CMD};
 

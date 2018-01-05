@@ -16,6 +16,7 @@ RUN apt-get -y update \
       git-core \
       libmodern-perl-perl \
       libxml-simple-perl \
+      libyaml-perl \
     && rm -rf /var/cache/apt/archives/* \
     && rm -rf /var/lib/api/lists/*
 

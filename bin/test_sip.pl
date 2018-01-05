@@ -10,6 +10,7 @@ use Modern::Perl;
 use English;
 
 use XML::Simple qw(:strict);
+use YAML;
 use Data::Dumper;
 
 my $parser = new XML::Simple(
@@ -31,36 +32,37 @@ my $parser = new XML::Simple(
     }
 );
 
-my $ref = $parser->XMLin( @ARGV ? shift : 'SIPconfig.xml' );
+my $file = shift or die "Usage $0 FILENAME\n";
+my $data = YAML::LoadFile($file);
 
-my $hostname = $ARGV[0];
+my $description  = $data->{description};
+my $hostname     = $data->{staff_url};
+my $port         = $data->{port};
+my $sip_accounts = $data->{sip_accounts};
 
-$hostname //= 'XXXX';
+my $xml = $parser->XMLin( '<xml>' . $sip_accounts . '</xml>' );
 
-for my $listener ( keys( %{ $ref->{listeners} } ) ) {
-    my ( $port, $network_protocol ) =
-      split( '/', $ref->{listeners}->{$listener}->{port} );
-    my $timeout = $ref->{listeners}->{$listener}->{timeout};
+my $logins = $xml->{login};
 
-    print("\nlistener: $listener\n") if $ENV{DEBUG};
-    print("port: $port\n")           if $ENV{DEBUG};
-    print("timeout: $timeout\n")     if $ENV{DEBUG};
+for my $key ( keys %{$logins} ) {
+    my $sip_user   = $logins->{$key}->{id};
+    my $sip_pass   = $logins->{$key}->{password};
+    my $location   = $logins->{$key}->{institution};
+    my $terminator = $logins->{$key}->{terminator};
 
-    for my $account ( keys( %{ $ref->{accounts} } ) ) {
-        my $sipcommand =
-            "/kohaclone/misc/sip_cli_emulator.pl "
-          . "--address $hostname "
-          . "--port $port "
-          . "--sip_user $ref->{accounts}->{$account}->{id} "
-          . "--sip_pass $ref->{accounts}->{$account}->{password} "
-          . "--location $ref->{accounts}->{$account}->{institution} "
-          . "--terminator $ref->{accounts}->{$account}->{terminator} ";
-        print "\n" . $sipcommand . "\n";
-        system $sipcommand;
-    }
+    my $sipcommand =
+        "/kohaclone/misc/sip_cli_emulator.pl "
+      . "--address $hostname "
+      . "--port $port "
+      . "--sip_user $sip_user "
+      . "--sip_pass $sip_pass "
+      . "--location $location "
+      . "--terminator $terminator ";
+    print "\n" . $sipcommand . "\n";
+    system $sipcommand;
 }
 
-print Dumper($ref) if $ENV{DEBUG};
-print Dumper( { 'server-params' => $ref->{'server-params'} } ) if $ENV{DEBUG};
-print Dumper( { 'xmlns'         => $ref->{'xmlns'} } )         if $ENV{DEBUG};
-print Dumper( { 'error-detect'  => $ref->{'error-detect'} } )  if $ENV{DEBUG};
+print Dumper($xml) if $ENV{DEBUG};
+print Dumper( { 'server-params' => $xml->{'server-params'} } ) if $ENV{DEBUG};
+print Dumper( { 'xmlns'         => $xml->{'xmlns'} } )         if $ENV{DEBUG};
+print Dumper( { 'error-detect'  => $xml->{'error-detect'} } )  if $ENV{DEBUG};
