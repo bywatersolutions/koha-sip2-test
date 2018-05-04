@@ -37,7 +37,7 @@ my $data = YAML::LoadFile($file);
 
 my $description  = $data->{description};
 my $hostname     = $data->{staff_url};
-my $port         = $data->{port};
+my $port         = $data->{sip_port};
 my $sip_accounts = $data->{sip_accounts};
 
 my $xml = $parser->XMLin( '<xml>' . $sip_accounts . '</xml>' );
