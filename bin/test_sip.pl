@@ -60,6 +60,19 @@ for my $key ( keys %{$logins} ) {
       . "--terminator $terminator ";
     print "\n" . $sipcommand . "\n";
     system $sipcommand;
+
+    $sipcommand =
+        "/kohaclone/misc/sip_cli_emulator.pl "
+      . "--address $hostname "
+      . "--port $port "
+      . "--sip_user $sip_user "
+      . "--sip_pass $sip_pass "
+      . "--location $location "
+      . "--terminator $terminator "
+      . "--message patron_information "
+      . "--patron bwssupport ";
+    print "\n" . $sipcommand . "\n";
+    system $sipcommand;
 }
 
 print Dumper($xml) if $ENV{DEBUG};
