@@ -7,11 +7,11 @@
 # in Sip::Configuration.pm
 #
 use Modern::Perl;
-use English;
 
+use Data::Dumper;
+use Term::SimpleColor;
 use XML::Simple qw(:strict);
 use YAML;
-use Data::Dumper;
 
 my $parser = new XML::Simple(
     KeyAttr => {
@@ -58,8 +58,14 @@ for my $key ( keys %{$logins} ) {
       . "--sip_pass $sip_pass "
       . "--location $location "
       . "--terminator $terminator ";
-    print "\n" . $sipcommand . "\n";
-    system $sipcommand;
+    print cyan "\n" . $sipcommand . "\n";
+    my $output = qx/$sipcommand/;
+    my $success = index($output, "Login Failed!") == -1;
+    if ( $success ) {
+        print green $output;
+    } else {
+        print red $output;
+    }
 
     $sipcommand =
         "/kohaclone/misc/sip_cli_emulator.pl "
@@ -71,8 +77,14 @@ for my $key ( keys %{$logins} ) {
       . "--terminator $terminator "
       . "--message patron_information "
       . "--patron bwssupport ";
-    print "\n" . $sipcommand . "\n";
-    system $sipcommand;
+    print cyan "\n" . $sipcommand . "\n";
+    $output = qx/$sipcommand/;
+    $success = index($output, "Login Failed!") == -1;
+    if ( $success ) {
+        print green $output;
+    } else {
+        print red $output;
+    }
 }
 
 print Dumper($xml) if $ENV{DEBUG};
