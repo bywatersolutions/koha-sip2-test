@@ -37,53 +37,55 @@ my $data = YAML::LoadFile($file);
 
 my $description  = $data->{description};
 my $hostname     = $data->{opac_url};
-my $port         = $data->{sip_port};
 my $sip_accounts = $data->{sip_accounts};
+my @ports = ref $data->{sip_port} eq 'ARRAY' ? @{ $data->{sip_port} } : ( $data->{sip_port} );
 
 my $xml = $parser->XMLin( '<xml>' . $sip_accounts . '</xml>' );
 
 my $logins = $xml->{login};
 
-for my $key ( keys %{$logins} ) {
-    my $sip_user   = $logins->{$key}->{id};
-    my $sip_pass   = $logins->{$key}->{password};
-    my $location   = $logins->{$key}->{institution};
-    my $terminator = $logins->{$key}->{terminator};
+foreach my $port ( @ports ) {
+    for my $key ( keys %{$logins} ) {
+        my $sip_user   = $logins->{$key}->{id};
+        my $sip_pass   = $logins->{$key}->{password};
+        my $location   = $logins->{$key}->{institution};
+        my $terminator = $logins->{$key}->{terminator};
 
-    my $sipcommand =
-        "/kohaclone/misc/sip_cli_emulator.pl "
-      . "--address $hostname "
-      . "--port $port "
-      . "--sip_user $sip_user "
-      . "--sip_pass $sip_pass "
-      . "--location $location "
-      . "--terminator $terminator ";
-    print cyan "\n" . $sipcommand . "\n";
-    my $output = qx/$sipcommand/;
-    my $success = index($output, "Login Failed!") == -1;
-    if ( $success ) {
-        print green $output;
-    } else {
-        print red $output;
-    }
+        my $sipcommand =
+            "/kohaclone/misc/sip_cli_emulator.pl "
+          . "--address $hostname "
+          . "--port $port "
+          . "--sip_user $sip_user "
+          . "--sip_pass $sip_pass "
+          . "--location $location "
+          . "--terminator $terminator ";
+        print cyan "\n" . $sipcommand . "\n";
+        my $output = qx/$sipcommand/;
+        my $success = index($output, "Login Failed!") == -1;
+        if ( $success ) {
+            print green $output;
+        } else {
+            print red $output;
+        }
 
-    $sipcommand =
-        "/kohaclone/misc/sip_cli_emulator.pl "
-      . "--address $hostname "
-      . "--port $port "
-      . "--sip_user $sip_user "
-      . "--sip_pass $sip_pass "
-      . "--location $location "
-      . "--terminator $terminator "
-      . "--message patron_information "
-      . "--patron bwssupport ";
-    print cyan "\n" . $sipcommand . "\n";
-    $output = qx/$sipcommand/;
-    $success = index($output, "Login Failed!") == -1;
-    if ( $success ) {
-        print green $output;
-    } else {
-        print red $output;
+        $sipcommand =
+            "/kohaclone/misc/sip_cli_emulator.pl "
+          . "--address $hostname "
+          . "--port $port "
+          . "--sip_user $sip_user "
+          . "--sip_pass $sip_pass "
+          . "--location $location "
+          . "--terminator $terminator "
+          . "--message patron_information "
+          . "--patron bwssupport ";
+        print cyan "\n" . $sipcommand . "\n";
+        $output = qx/$sipcommand/;
+        $success = index($output, "Login Failed!") == -1;
+        if ( $success ) {
+            print green $output;
+        } else {
+            print red $output;
+        }
     }
 }
 
