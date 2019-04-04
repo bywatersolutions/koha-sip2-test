@@ -77,6 +77,7 @@ foreach my $port ( @ports ) {
           . "--location $location "
           . "--terminator $terminator "
           . "--message patron_information "
+          . "--summary '   Y      '"
           . "--patron bwssupport ";
         print cyan "\n" . $sipcommand . "\n";
         $output = qx/$sipcommand/;
