@@ -38,10 +38,12 @@ my $data = YAML::LoadFile($file);
 my $description  = $data->{description};
 my $hostname     = $data->{opac_url};
 my $sip_accounts = $data->{sip_accounts};
+
 my @ports =
-    ref $data->{sip_port} eq 'ARRAY' ? @{ $data->{sip_port} }
-  : ref $data->{sip_port} eq 'HASH'  ? $data->{sip_port}->{port}
-  :                                    $data->{sip_port};
+  map { ref $_ eq 'HASH' ? $_->{port} : $_ }
+  ref $data->{sip_port} eq 'ARRAY'
+  ? @{ $data->{sip_port} }
+  : ( $data->{sip_port} );
 
 my $xml = $parser->XMLin( '<xml>' . $sip_accounts . '</xml>' );
 
