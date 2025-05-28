@@ -37,6 +37,7 @@ my $data = YAML::LoadFile($file);
 
 my $description  = $data->{description};
 my $hostname     = $data->{opac_url};
+$hostname =~ s/bywatersolutions.com/bywatersolutions.io/;
 my $sip_accounts = $data->{sip_accounts};
 
 my @ports =
